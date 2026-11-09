@@ -1,0 +1,56 @@
+{
+  "name": "dsh-local-monitor",
+  "version": "1.0.0",
+  "description": "DSH Local Monitor — a floating sensor dashboard for the DeepSeek Harness Web UI: GPU-Z sensors (temperature, clock, dedicated VRAM) on the left, CPU temperature/clock and system memory on the right.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "helper.ps1",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "node --check index.js && node --check client.js"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "gpu-z",
+    "sensors",
+    "monitoring",
+    "widget",
+    "dashboard",
+    "windows"
+  ],
+  "author": "Volperine",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/astelirons-ai/dsh-local-monitor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/astelirons-ai/dsh-local-monitor/issues"
+  },
+  "homepage": "https://github.com/astelirons-ai/dsh-local-monitor#readme",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

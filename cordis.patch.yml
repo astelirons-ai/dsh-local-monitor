@@ -1,0 +1,8 @@
+# dsh-local-monitor — bundle patch
+#
+# Mounts the Host collector (GPU-Z shared memory + CPU/memory sensors) and its
+# browser half (the floating window rendered into `shell.overlay`).
+
+- insert:
+    - id: dsh-local-monitor
+      name: dsh-local-monitor

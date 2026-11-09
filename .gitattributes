@@ -1,0 +1,4 @@
+* text=auto
+
+# Windows PowerShell reads CRLF-saved scripts most predictably.
+*.ps1 text eol=crlf

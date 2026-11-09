@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Logs and local test output
+*.log
+_test.*
+_t2.*
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
