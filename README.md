@@ -16,6 +16,17 @@ across reloads, collapses to a single header row, and follows the app theme
 (light and dark). Labels are **English by default**; French is used when the DSH
 app locale is French, and either can be forced (see [Language](#language)).
 
+## Screenshots
+
+![DSH Local Monitor — expanded](assets/screenshot-expanded.png)
+
+*Expanded: the six live cards, GPU on the left, CPU on the right.*
+
+![DSH Local Monitor — collapsed](assets/screenshot-collapsed.png)
+
+*Collapsed: the header alone. The chevron in the top-right corner expands and
+collapses the window; hovering it shows "Collapse"/"Expand".*
+
 ## Features
 
 - **Live by default** — the Host samples every second, the window refreshes

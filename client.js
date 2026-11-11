@@ -166,7 +166,7 @@ window.__ModuleLoader__.load({
       '.dsd-dot.warn{background:var(--dsw-alias-state-warn-primary,#e2a03f)}',
       '.dsd-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:5px;' +
         'border:1px solid transparent;background:transparent;color:var(--dsw-alias-label-secondary,#a7a8ad);' +
-        'cursor:pointer;font-size:' + FS(13) + 'px;line-height:1;padding:0}',
+        'cursor:pointer;font-size:' + FS(15) + 'px;line-height:1;padding:0}',
       '.dsd-icon:hover{background:var(--dsw-alias-bg-layer-2,rgba(255,255,255,.08));' +
         'color:var(--dsw-alias-label-primary,#e8e8ea)}',
       '.dsd-body{padding:' + Y_BODY_PAD + 'px ' + X_BODY_PAD + 'px}',
@@ -520,6 +520,7 @@ window.__ModuleLoader__.load({
               type: 'button',
               title: collapsed ? L.expand : L.collapse,
               'aria-label': collapsed ? L.expand : L.collapse,
+              'aria-expanded': !collapsed,
               onPointerDown: function (event) {
                 event.stopPropagation()
               },
