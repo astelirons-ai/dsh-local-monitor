@@ -1,4 +1,4 @@
-/* dsh-local-monitor â€” browser half.
+/* dsh-local-monitor — browser half.
  *
  * A draggable floating window registered into `shell.overlay` (the frame-wide
  * floating layer). Two columns of three cards: GPU on the left (GPU-Z sensors),
@@ -49,26 +49,26 @@ window.__ModuleLoader__.load({
         sensors: 'Capteurs',
         live: 'en direct',
         offline: 'hors ligne',
-        connecting: 'connexionâ€¦',
-        gpuTemp: 'TempÃ©rature GPU',
-        gpuClock: 'FrÃ©quence GPU',
-        gpuVram: 'MÃ©moire dÃ©diÃ©e',
-        cpuTemp: 'TempÃ©rature CPU',
-        cpuClock: 'FrÃ©quence CPU',
-        cpuMem: 'MÃ©moire systÃ¨me',
+        connecting: 'connexion…',
+        gpuTemp: 'Température GPU',
+        gpuClock: 'Fréquence GPU',
+        gpuVram: 'Mémoire dédiée',
+        cpuTemp: 'Température CPU',
+        cpuClock: 'Fréquence CPU',
+        cpuMem: 'Mémoire système',
         hotSpot: 'point chaud',
-        memoryClock: 'mÃ©moire',
-        vramUsed: 'Mo utilisÃ©s',
+        memoryClock: 'mémoire',
+        vramUsed: 'Mo utilisés',
         viaGpuZ: 'via GPU-Z',
-        motherboardZone: 'zone carte mÃ¨re',
+        motherboardZone: 'zone carte mère',
         sensorUnavailable: 'capteur indisponible',
         load: 'charge',
         gpuMissingTitle: 'GPU-Z introuvable',
         gpuMissingBody: 'lancez GPU-Z pour lire ses capteurs',
         cpuUnavailable: 'CPU indisponible',
         collapse: 'Replier',
-        expand: 'DÃ©plier',
-        dragHint: 'Glisser pour dÃ©placer',
+        expand: 'Déplier',
+        dragHint: 'Glisser pour déplacer',
         regionLabel: 'Tableau de bord des capteurs',
         gib: 'Go',
         mib: 'Mo',
@@ -78,7 +78,7 @@ window.__ModuleLoader__.load({
         sensors: 'Sensors',
         live: 'live',
         offline: 'offline',
-        connecting: 'connectingâ€¦',
+        connecting: 'connecting…',
         gpuTemp: 'GPU temperature',
         gpuClock: 'GPU clock',
         gpuVram: 'Dedicated VRAM',
@@ -238,12 +238,12 @@ window.__ModuleLoader__.load({
     }
 
     function formatTemp(value, nf) {
-      if (value === null || value === undefined) return 'â€”'
+      if (value === null || value === undefined) return '—'
       return nf.one.format(value)
     }
 
     function formatClock(mhz, nf) {
-      if (mhz === null || mhz === undefined || !isFinite(mhz)) return 'â€”'
+      if (mhz === null || mhz === undefined || !isFinite(mhz)) return '—'
       if (mhz >= 1000) return nf.two.format(mhz / 1000) + ' GHz'
       return nf.zero.format(mhz) + ' MHz'
     }
@@ -421,7 +421,7 @@ window.__ModuleLoader__.load({
       var ramNote = null
       if (mem) {
         ramRatio = mem.pct !== null && mem.pct !== undefined ? mem.pct / 100 : null
-        ramNote = (formatBytes(mem.usedBytes, nf, L.gib) || 'â€”') + ' / ' + (formatBytes(mem.totalBytes, nf, L.gib) || 'â€”')
+        ramNote = (formatBytes(mem.usedBytes, nf, L.gib) || '—') + ' / ' + (formatBytes(mem.totalBytes, nf, L.gib) || '—')
       }
 
       var gpuCards = gpu
@@ -430,11 +430,11 @@ window.__ModuleLoader__.load({
               key: 'gpu-temp',
               title: L.gpuTemp,
               value: formatTemp(gpu.temp, nf),
-              unit: gpu.temp === null || gpu.temp === undefined ? null : 'Â°C',
+              unit: gpu.temp === null || gpu.temp === undefined ? null : '°C',
               color: stateColor(gpu.temp),
               note:
                 gpu.hotSpot !== null && gpu.hotSpot !== undefined
-                  ? L.hotSpot + ' ' + nf.one.format(gpu.hotSpot) + ' Â°C'
+                  ? L.hotSpot + ' ' + nf.one.format(gpu.hotSpot) + ' °C'
                   : gpu.chip || null,
             }),
             h(Card, {
@@ -446,7 +446,7 @@ window.__ModuleLoader__.load({
             h(Card, {
               key: 'gpu-vram',
               title: L.gpuVram,
-              value: gpu.vramUsedMB ? nf.one.format(gpu.vramUsedMB / 1024) : 'â€”',
+              value: gpu.vramUsedMB ? nf.one.format(gpu.vramUsedMB / 1024) : '—',
               unit: gpu.vramUsedMB ? L.gib : null,
               ratio: vramRatio,
               note: vramNote,
@@ -468,7 +468,7 @@ window.__ModuleLoader__.load({
               key: 'cpu-temp',
               title: L.cpuTemp,
               value: formatTemp(cpu.temp, nf),
-              unit: cpu.temp === null || cpu.temp === undefined ? null : 'Â°C',
+              unit: cpu.temp === null || cpu.temp === undefined ? null : '°C',
               color: stateColor(cpu.temp),
               note:
                 cpu.temp === null
@@ -488,7 +488,7 @@ window.__ModuleLoader__.load({
             h(Card, {
               key: 'cpu-ram',
               title: L.cpuMem,
-              value: mem ? formatBytes(mem.usedBytes, nf, L.gib) || 'â€”' : 'â€”',
+              value: mem ? formatBytes(mem.usedBytes, nf, L.gib) || '—' : '—',
               ratio: ramRatio,
               note: ramNote,
             }),
@@ -527,7 +527,7 @@ window.__ModuleLoader__.load({
                 setCollapsed(!collapsed)
               },
             },
-            collapsed ? 'â–¾' : 'â–´',
+            collapsed ? '▾' : '▴',
           ),
         ),
         h(
