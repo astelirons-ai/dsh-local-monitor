@@ -170,8 +170,12 @@ window.__ModuleLoader__.load({
       '.dsd-icon:hover{background:var(--dsw-alias-bg-layer-2,rgba(255,255,255,.08));' +
         'color:var(--dsw-alias-label-primary,#e8e8ea)}',
       '.dsd-body{padding:' + Y_BODY_PAD + 'px ' + X_BODY_PAD + 'px}',
-      '.dsd-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:' + X_ROW_GAP + 'px;row-gap:' + Y_ROW_GAP + 'px;align-items:start}',
+      '.dsd-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:' + X_ROW_GAP + 'px;row-gap:' + Y_ROW_GAP + 'px}',
       '.dsd-col{display:flex;flex-direction:column;gap:' + Y_ROW_GAP + 'px;min-width:0}',
+      // Grid rows are shared between the two columns, so cards in one row already
+      // end at the same y. The column flex must not re-stretch them to the tallest
+      // content (align-items:start keeps every card its own height).
+      '.dsd-card{align-self:start}',
       '.dsd-col-head{display:flex;align-items:baseline;gap:4px;padding:0 1px 1px}',
       '.dsd-col-name{font-size:' + FS(10) + 'px;line-height:1.1;font-weight:700;letter-spacing:.08em;text-transform:uppercase;' +
         'color:var(--dsw-alias-label-secondary,#a7a8ad)}',
