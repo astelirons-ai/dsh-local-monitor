@@ -1,4 +1,4 @@
-/* dsh-local-monitor — browser half.
+/* dsh-local-monitor â€” browser half.
  *
  * A draggable floating window registered into `shell.overlay` (the frame-wide
  * floating layer). Two columns of three cards: GPU on the left (GPU-Z sensors),
@@ -18,19 +18,29 @@ window.__ModuleLoader__.load({
 
     var ROUTE = '/dsh-local-monitor/sensors.json'
     var POLL_MS = 1500
-    var WIDTH = 372
-    // Vertical-only density: every vertical metric (paddings, gaps, line heights,
-    // card height) is multiplied by 0.9, so the window is ~10% shorter while the
-    // width and the glyph sizes stay exactly as they are.
-    var VSCALE = 0.9
+    // Window width: 372 px was the original frame, 260 px was -30 %, 221 px is
+    // another -15 % on top of that.
+    var WIDTH = 221
+    // Vertical density: 0.61 (previous step) x 0.74 -> height -15 % more.
+    // Kept separate from FSCALE on purpose: the type stays at 6.7/14.7 px, only
+    // the vertical furniture (paddings, gaps, line boxes, card height) shrinks.
+    var VSCALE = 0.45
+    // Type scale: 0.8 (previous step) x 0.85, so glyphs keep fitting the frame.
+    var FSCALE = 0.7
     var Y_HEAD_PAD = Math.round(8 * VSCALE)
     var Y_BODY_PAD = Math.round(10 * VSCALE)
+    var X_BODY_PAD = 6
     var Y_ROW_GAP = Math.round(8 * VSCALE)
+    var X_ROW_GAP = 5
     var Y_CARD_PAD_TOP = Math.round(8 * VSCALE)
     var Y_CARD_PAD_BOTTOM = Math.round(9 * VSCALE)
+    var X_CARD_PAD = 7
     var Y_CARD_MIN = Math.round(74 * VSCALE)
     var Y_BAR_MARGIN = Math.round(6 * VSCALE)
     var Y_NOTE_MARGIN = Math.round(4 * VSCALE)
+    function FS(px) {
+      return Math.round(px * FSCALE * 10) / 10
+    }
     var STORAGE_POSITION = 'dsh-local-monitor.position.v1'
     var STORAGE_COLLAPSED = 'dsh-local-monitor.collapsed.v1'
 
@@ -39,26 +49,26 @@ window.__ModuleLoader__.load({
         sensors: 'Capteurs',
         live: 'en direct',
         offline: 'hors ligne',
-        connecting: 'connexion…',
-        gpuTemp: 'Température GPU',
-        gpuClock: 'Fréquence GPU',
-        gpuVram: 'Mémoire dédiée',
-        cpuTemp: 'Température CPU',
-        cpuClock: 'Fréquence CPU',
-        cpuMem: 'Mémoire système',
+        connecting: 'connexionâ€¦',
+        gpuTemp: 'TempÃ©rature GPU',
+        gpuClock: 'FrÃ©quence GPU',
+        gpuVram: 'MÃ©moire dÃ©diÃ©e',
+        cpuTemp: 'TempÃ©rature CPU',
+        cpuClock: 'FrÃ©quence CPU',
+        cpuMem: 'MÃ©moire systÃ¨me',
         hotSpot: 'point chaud',
-        memoryClock: 'mémoire',
-        vramUsed: 'Mo utilisés',
+        memoryClock: 'mÃ©moire',
+        vramUsed: 'Mo utilisÃ©s',
         viaGpuZ: 'via GPU-Z',
-        motherboardZone: 'zone carte mère',
+        motherboardZone: 'zone carte mÃ¨re',
         sensorUnavailable: 'capteur indisponible',
         load: 'charge',
         gpuMissingTitle: 'GPU-Z introuvable',
         gpuMissingBody: 'lancez GPU-Z pour lire ses capteurs',
         cpuUnavailable: 'CPU indisponible',
         collapse: 'Replier',
-        expand: 'Déplier',
-        dragHint: 'Glisser pour déplacer',
+        expand: 'DÃ©plier',
+        dragHint: 'Glisser pour dÃ©placer',
         regionLabel: 'Tableau de bord des capteurs',
         gib: 'Go',
         mib: 'Mo',
@@ -68,7 +78,7 @@ window.__ModuleLoader__.load({
         sensors: 'Sensors',
         live: 'live',
         offline: 'offline',
-        connecting: 'connecting…',
+        connecting: 'connectingâ€¦',
         gpuTemp: 'GPU temperature',
         gpuClock: 'GPU clock',
         gpuVram: 'Dedicated VRAM',
@@ -96,8 +106,19 @@ window.__ModuleLoader__.load({
     }
 
     var LANGUAGE = 'en'
+    var STORAGE_LANG = 'dsh-local-monitor.lang'
 
+    /**
+     * English by default, French only when the DSH app locale says so.
+     * An explicit choice in localStorage wins over both, e.g.
+     *   localStorage.setItem('dsh-local-monitor.lang', 'fr')
+     * then reload the page.
+     */
     function resolveLanguage(ctx) {
+      try {
+        var chosen = window.localStorage.getItem(STORAGE_LANG)
+        if (chosen === 'fr' || chosen === 'en') return chosen
+      } catch (e) {}
       var appLocale = ''
       try {
         if (ctx && typeof ctx.get === 'function') {
@@ -108,14 +129,7 @@ window.__ModuleLoader__.load({
           }
         }
       } catch (e) {}
-      var browserLocale = ''
-      try {
-        browserLocale = String(window.navigator.language || '')
-      } catch (e) {}
-      var french = function (tag) {
-        return String(tag || '').toLowerCase().indexOf('fr') === 0
-      }
-      return french(appLocale) || french(browserLocale) ? 'fr' : 'en'
+      return String(appLocale || '').toLowerCase().indexOf('fr') === 0 ? 'fr' : 'en'
     }
 
     var NUMBER_FORMATS = {}
@@ -136,53 +150,53 @@ window.__ModuleLoader__.load({
         'background:var(--dsw-alias-bg-overlay,rgba(20,21,25,.96));color:var(--dsw-alias-label-primary,#e8e8ea);' +
         'border:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.12));' +
         'box-shadow:0 18px 48px rgba(0,0,0,.34),0 2px 8px rgba(0,0,0,.22);' +
-        'font:13px/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;' +
+        'font:' + FS(13) + 'px/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;' +
         'pointer-events:auto;overflow:hidden;user-select:none;-webkit-user-select:none}',
-      '.dsd-head{display:flex;align-items:center;gap:8px;padding:' + Y_HEAD_PAD + 'px 10px;cursor:grab;' +
-        'line-height:1.25;' +
+      '.dsd-head{display:flex;align-items:center;gap:6px;padding:' + Y_HEAD_PAD + 'px 8px;cursor:grab;' +
+        'line-height:1.1;' +
         'background:var(--dsw-alias-bg-layer-1,rgba(255,255,255,.04));' +
         'border-bottom:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.1))}',
       '.dsd-head:active{cursor:grabbing}',
-      '.dsd-title{font-size:12px;line-height:1.2;font-weight:600;letter-spacing:.04em;text-transform:uppercase;' +
+      '.dsd-title{font-size:' + FS(12) + 'px;line-height:1.1;font-weight:600;letter-spacing:.04em;text-transform:uppercase;' +
         'color:var(--dsw-alias-label-secondary,#a7a8ad)}',
-      '.dsd-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;line-height:1.2;' +
+      '.dsd-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:' + FS(11) + 'px;line-height:1.1;' +
         'color:var(--dsw-alias-label-secondary,#a7a8ad)}',
-      '.dsd-dot{width:7px;height:7px;border-radius:50%;background:var(--dsw-alias-state-idle-primary,#8b8d94)}',
-      '.dsd-dot.live{background:var(--dsw-alias-state-success-primary,#3ecf8e);box-shadow:0 0 0 3px rgba(62,207,142,.16)}',
+      '.dsd-dot{width:6px;height:6px;border-radius:50%;background:var(--dsw-alias-state-idle-primary,#8b8d94)}',
+      '.dsd-dot.live{background:var(--dsw-alias-state-success-primary,#3ecf8e);box-shadow:0 0 0 2px rgba(62,207,142,.16)}',
       '.dsd-dot.warn{background:var(--dsw-alias-state-warn-primary,#e2a03f)}',
-      '.dsd-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:6px;' +
+      '.dsd-icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:5px;' +
         'border:1px solid transparent;background:transparent;color:var(--dsw-alias-label-secondary,#a7a8ad);' +
-        'cursor:pointer;font-size:13px;line-height:1;padding:0}',
+        'cursor:pointer;font-size:' + FS(13) + 'px;line-height:1;padding:0}',
       '.dsd-icon:hover{background:var(--dsw-alias-bg-layer-2,rgba(255,255,255,.08));' +
         'color:var(--dsw-alias-label-primary,#e8e8ea)}',
-      '.dsd-body{padding:' + Y_BODY_PAD + 'px}',
-      '.dsd-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:8px;row-gap:' + Y_ROW_GAP + 'px;align-items:start}',
+      '.dsd-body{padding:' + Y_BODY_PAD + 'px ' + X_BODY_PAD + 'px}',
+      '.dsd-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:' + X_ROW_GAP + 'px;row-gap:' + Y_ROW_GAP + 'px;align-items:start}',
       '.dsd-col{display:flex;flex-direction:column;gap:' + Y_ROW_GAP + 'px;min-width:0}',
-      '.dsd-col-head{display:flex;align-items:baseline;gap:6px;padding:0 2px 1px}',
-      '.dsd-col-name{font-size:10px;line-height:1.2;font-weight:700;letter-spacing:.1em;text-transform:uppercase;' +
+      '.dsd-col-head{display:flex;align-items:baseline;gap:4px;padding:0 1px 1px}',
+      '.dsd-col-name{font-size:' + FS(10) + 'px;line-height:1.1;font-weight:700;letter-spacing:.08em;text-transform:uppercase;' +
         'color:var(--dsw-alias-label-secondary,#a7a8ad)}',
-      '.dsd-col-model{font-size:9.5px;line-height:1.2;color:var(--dsw-alias-label-secondary,#a7a8ad);opacity:.75;' +
+      '.dsd-col-model{font-size:' + FS(9.5) + 'px;line-height:1.1;color:var(--dsw-alias-label-secondary,#a7a8ad);opacity:.75;' +
         'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}',
       '.dsd-card{background:var(--dsw-alias-bg-layer-1,rgba(255,255,255,.045));' +
-        'border:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.08));border-radius:10px;' +
-        'padding:' + Y_CARD_PAD_TOP + 'px 10px ' + Y_CARD_PAD_BOTTOM + 'px;min-height:' + Y_CARD_MIN + 'px;' +
-        'display:flex;flex-direction:column;gap:2px;box-sizing:border-box}',
-      '.dsd-card-label{font-size:9.5px;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;' +
+        'border:1px solid var(--dsw-alias-border-l1,rgba(255,255,255,.08));border-radius:8px;' +
+        'padding:' + Y_CARD_PAD_TOP + 'px ' + X_CARD_PAD + 'px ' + Y_CARD_PAD_BOTTOM + 'px;min-height:' + Y_CARD_MIN + 'px;' +
+        'display:flex;flex-direction:column;gap:0;box-sizing:border-box}',
+      '.dsd-card-label{font-size:' + FS(9.5) + 'px;line-height:1.05;letter-spacing:.04em;text-transform:uppercase;' +
         'color:var(--dsw-alias-label-secondary,#a7a8ad);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
-      '.dsd-card-value{margin-top:auto;font-size:21px;font-weight:650;line-height:1.05;' +
+      '.dsd-card-value{margin-top:auto;font-size:' + FS(21) + 'px;font-weight:650;line-height:1;' +
         'font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}',
-      '.dsd-unit{margin-left:4px;font-size:11.5px;font-weight:500;' +
+      '.dsd-unit{margin-left:3px;font-size:' + FS(11.5) + 'px;font-weight:500;' +
         'color:var(--dsw-alias-label-secondary,#a7a8ad)}',
       '.dsd-bar{margin-top:' + Y_BAR_MARGIN + 'px;height:3px;border-radius:2px;overflow:hidden;' +
         'background:var(--dsw-alias-bg-layer-2,rgba(255,255,255,.1))}',
       '.dsd-bar-fill{height:100%;border-radius:2px;transition:width .35s ease,background-color .35s ease}',
-      '.dsd-note{margin-top:' + Y_NOTE_MARGIN + 'px;font-size:9.5px;line-height:1.2;' +
+      '.dsd-note{margin-top:' + Y_NOTE_MARGIN + 'px;font-size:' + FS(9.5) + 'px;line-height:1.05;' +
         'color:var(--dsw-alias-label-secondary,#a7a8ad);opacity:.8;' +
         'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
       '.dsd-collapsed .dsd-body{display:none}',
-      '.dsd-missing{font-size:10.5px;color:var(--dsw-alias-label-secondary,#a7a8ad);' +
-        'border:1px dashed var(--dsw-alias-border-l1,rgba(255,255,255,.14));border-radius:10px;' +
-        'padding:10px;text-align:center;line-height:1.45}',
+      '.dsd-missing{font-size:' + FS(10.5) + 'px;color:var(--dsw-alias-label-secondary,#a7a8ad);' +
+        'border:1px dashed var(--dsw-alias-border-l1,rgba(255,255,255,.14));border-radius:8px;' +
+        'padding:8px 6px;text-align:center;line-height:1.4}',
     ].join('\n')
 
     function readPosition() {
@@ -224,12 +238,12 @@ window.__ModuleLoader__.load({
     }
 
     function formatTemp(value, nf) {
-      if (value === null || value === undefined) return '—'
+      if (value === null || value === undefined) return 'â€”'
       return nf.one.format(value)
     }
 
     function formatClock(mhz, nf) {
-      if (mhz === null || mhz === undefined || !isFinite(mhz)) return '—'
+      if (mhz === null || mhz === undefined || !isFinite(mhz)) return 'â€”'
       if (mhz >= 1000) return nf.two.format(mhz / 1000) + ' GHz'
       return nf.zero.format(mhz) + ' MHz'
     }
@@ -407,7 +421,7 @@ window.__ModuleLoader__.load({
       var ramNote = null
       if (mem) {
         ramRatio = mem.pct !== null && mem.pct !== undefined ? mem.pct / 100 : null
-        ramNote = (formatBytes(mem.usedBytes, nf, L.gib) || '—') + ' / ' + (formatBytes(mem.totalBytes, nf, L.gib) || '—')
+        ramNote = (formatBytes(mem.usedBytes, nf, L.gib) || 'â€”') + ' / ' + (formatBytes(mem.totalBytes, nf, L.gib) || 'â€”')
       }
 
       var gpuCards = gpu
@@ -416,11 +430,11 @@ window.__ModuleLoader__.load({
               key: 'gpu-temp',
               title: L.gpuTemp,
               value: formatTemp(gpu.temp, nf),
-              unit: gpu.temp === null || gpu.temp === undefined ? null : '°C',
+              unit: gpu.temp === null || gpu.temp === undefined ? null : 'Â°C',
               color: stateColor(gpu.temp),
               note:
                 gpu.hotSpot !== null && gpu.hotSpot !== undefined
-                  ? L.hotSpot + ' ' + nf.one.format(gpu.hotSpot) + ' °C'
+                  ? L.hotSpot + ' ' + nf.one.format(gpu.hotSpot) + ' Â°C'
                   : gpu.chip || null,
             }),
             h(Card, {
@@ -432,7 +446,7 @@ window.__ModuleLoader__.load({
             h(Card, {
               key: 'gpu-vram',
               title: L.gpuVram,
-              value: gpu.vramUsedMB ? nf.one.format(gpu.vramUsedMB / 1024) : '—',
+              value: gpu.vramUsedMB ? nf.one.format(gpu.vramUsedMB / 1024) : 'â€”',
               unit: gpu.vramUsedMB ? L.gib : null,
               ratio: vramRatio,
               note: vramNote,
@@ -454,7 +468,7 @@ window.__ModuleLoader__.load({
               key: 'cpu-temp',
               title: L.cpuTemp,
               value: formatTemp(cpu.temp, nf),
-              unit: cpu.temp === null || cpu.temp === undefined ? null : '°C',
+              unit: cpu.temp === null || cpu.temp === undefined ? null : 'Â°C',
               color: stateColor(cpu.temp),
               note:
                 cpu.temp === null
@@ -474,7 +488,7 @@ window.__ModuleLoader__.load({
             h(Card, {
               key: 'cpu-ram',
               title: L.cpuMem,
-              value: mem ? formatBytes(mem.usedBytes, nf, L.gib) || '—' : '—',
+              value: mem ? formatBytes(mem.usedBytes, nf, L.gib) || 'â€”' : 'â€”',
               ratio: ramRatio,
               note: ramNote,
             }),
@@ -513,7 +527,7 @@ window.__ModuleLoader__.load({
                 setCollapsed(!collapsed)
               },
             },
-            collapsed ? '▾' : '▴',
+            collapsed ? 'â–¾' : 'â–´',
           ),
         ),
         h(

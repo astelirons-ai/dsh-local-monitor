@@ -13,8 +13,8 @@ Six live cards in one compact window:
 
 The window can be dragged anywhere by its title bar, remembers its position
 across reloads, collapses to a single header row, and follows the app theme
-(light and dark). Labels are bilingual: French when the app locale or the
-browser is French, English otherwise.
+(light and dark). Labels are **English by default**; French is used when the DSH
+app locale is French, and either can be forced (see [Language](#language)).
 
 ## Features
 
@@ -85,18 +85,33 @@ Windows CPU / memory   ─┼─> helper.ps1 (persistent child) ──> Host rou
 
 ## Tuning
 
-Two constants at the top of `client.js`:
+Three constants at the top of `client.js`:
 
 ```js
-var WIDTH = 372   // window width in CSS pixels
-var VSCALE = 0.9  // vertical density: 1 = original height, 0.9 = 10% shorter
+var WIDTH = 221    // window width in CSS pixels
+var VSCALE = 0.45  // vertical density: 1 = original height, 0.45 = 55% shorter
+var FSCALE = 0.7   // glyph scale, applied to every font size
 ```
 
-`VSCALE` compresses paddings, gaps, card heights and line heights only — glyph
-sizes and the width stay untouched.
+`VSCALE` only compresses the vertical furniture (paddings, gaps, line heights,
+card height). `FSCALE` shrinks the type, which is what keeps the labels inside
+narrow columns; lower it when you make the window much narrower, raise it if the
+labels feel too small.
 
 The sampling interval lives in `helper.ps1` (`$intervalMs = 1000`) and the poll
 interval in `client.js` (`POLL_MS = 1500`).
+
+## Language
+
+Labels ship in English and French. The window picks French when the DSH app
+locale is French, English otherwise. To pin one language regardless of the app
+locale, run this once in the browser console (DevTools) and reload the page:
+
+```js
+localStorage.setItem('dsh-local-monitor.lang', 'fr')   // or 'en'
+```
+
+Remove the override with `localStorage.removeItem('dsh-local-monitor.lang')`.
 
 ## Troubleshooting
 
