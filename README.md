@@ -16,6 +16,39 @@ across reloads, collapses to a single header row, and follows the app theme
 (light and dark). Labels are **English by default**; French is used when the DSH
 app locale is French, and either can be forced (see [Language](#language)).
 
+## 中文简介
+
+**DSH Local Monitor** 是 DeepSeek Harness Web UI 的一个可拖动的悬浮式传感器面板：
+左侧显示 GPU 数据（来自 **GPU-Z**），右侧显示 CPU 与系统内存数据。
+
+六张实时卡片集成在一个紧凑窗口中：
+
+| 左栏 — GPU | 右栏 — CPU |
+| --- | --- |
+| GPU 温度 | CPU 温度 |
+| GPU 频率 | CPU 频率 |
+| 专用显存占用（带 /16 GB 进度条） | 系统内存占用（带 /32 GB 进度条） |
+
+- 按住标题栏即可把窗口拖到任意位置，刷新后仍会记住位置；可折叠成单行标题。
+- 宿主每秒采样一次，窗口每 1.5 秒刷新；状态圆点显示 *实时* 或 *离线*。
+- 直接读取 GPU-Z 运行时公布的 `GPUZShmem` 共享内存（即其 *Sensors* 标签页中的数值），
+  不使用 OCR，也不截屏。
+- 渲染到 `shell.overlay` 槽位，浮于各栏之上，且不会拦截其他区域的点击。
+- 跟随 Harness 主题（浅色 / 深色）。
+- 无 npm 依赖、无需构建步骤。
+- 界面标签默认英文，当 DSH 应用语言为法语时显示法语。
+
+**环境要求：** Windows 10/11、正在运行的 GPU-Z、带 web profile 的 DeepSeek Harness。
+未运行 GPU-Z 时，GPU 栏显示 *“GPU-Z not found”*，其余部分仍可正常工作。
+
+**安装：**
+
+```powershell
+dsh plugin --profile web add github:astelirons-ai/dsh-local-monitor
+```
+
+然后重新加载 Web UI（`Ctrl+Shift+R`）。
+
 ## Screenshots
 
 ![DSH Local Monitor — expanded](assets/screenshot-expanded.png)
